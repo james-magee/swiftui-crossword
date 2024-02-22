@@ -9,18 +9,18 @@
 /* Begin PBXBuildFile section */
 		1A2BAF252B6F26F600AF7C7D /* nytmini_backport_iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2BAF242B6F26F600AF7C7D /* nytmini_backport_iosApp.swift */; };
 		1A2BAF272B6F26F600AF7C7D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2BAF262B6F26F600AF7C7D /* ContentView.swift */; };
-		1A2BAF292B6F26F600AF7C7D /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2BAF282B6F26F600AF7C7D /* Item.swift */; };
 		1A2BAF2B2B6F26F700AF7C7D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A2BAF2A2B6F26F700AF7C7D /* Assets.xcassets */; };
 		1A2BAF2E2B6F26F700AF7C7D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A2BAF2D2B6F26F700AF7C7D /* Preview Assets.xcassets */; };
+		1A5917C12B77619A00F10437 /* Board.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A5917C02B77619A00F10437 /* Board.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1A2BAF212B6F26F600AF7C7D /* nytmini-backport-ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "nytmini-backport-ios.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A2BAF242B6F26F600AF7C7D /* nytmini_backport_iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nytmini_backport_iosApp.swift; sourceTree = "<group>"; };
 		1A2BAF262B6F26F600AF7C7D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		1A2BAF282B6F26F600AF7C7D /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		1A2BAF2A2B6F26F700AF7C7D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A2BAF2D2B6F26F700AF7C7D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		1A5917C02B77619A00F10437 /* Board.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Board.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,7 +55,7 @@
 			children = (
 				1A2BAF242B6F26F600AF7C7D /* nytmini_backport_iosApp.swift */,
 				1A2BAF262B6F26F600AF7C7D /* ContentView.swift */,
-				1A2BAF282B6F26F600AF7C7D /* Item.swift */,
+				1A5917C02B77619A00F10437 /* Board.swift */,
 				1A2BAF2A2B6F26F700AF7C7D /* Assets.xcassets */,
 				1A2BAF2C2B6F26F700AF7C7D /* Preview Content */,
 			);
@@ -141,7 +141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A2BAF272B6F26F600AF7C7D /* ContentView.swift in Sources */,
-				1A2BAF292B6F26F600AF7C7D /* Item.swift in Sources */,
+				1A5917C12B77619A00F10437 /* Board.swift in Sources */,
 				1A2BAF252B6F26F600AF7C7D /* nytmini_backport_iosApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
