@@ -25,7 +25,7 @@ struct nytmini_backport_iosApp: App {
 
     var body: some Scene {
         WindowGroup {
-          ContentView(boardInput: buildTestBoard())
+          ContentView(board: buildTestBoard())
         }
 //        .modelContainer(sharedModelContainer)
     }
