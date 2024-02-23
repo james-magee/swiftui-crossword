@@ -33,8 +33,8 @@ extension ContentView {
       var colList: [[SquareState]] = []
       for (_, row) in board.rows.enumerated() {
         var rowList: [SquareState] = []
-        for (_, sq) in row.squares.enumerated() {
-          rowList.append(SquareState(black: sq.correctLetter == nil, id: UUID().uuidString, selected: false, letter: ""))
+        for (_, _) in row.squares.enumerated() {
+          rowList.append(SquareState(id: UUID().uuidString, selected: false, letter: ""))
         }
         colList.append(rowList)
       }
@@ -42,8 +42,8 @@ extension ContentView {
       boardState = colList
       rowLength = board.numCols
       rowCount = board.numRows
-      textInput = ""
-      oldTextInput = ""
+      textInput = "dl;kfjasl;fjdslajfklsajlf;jksaldjf;jsakfajsdlfj;;kasjfd;ajk"
+      oldTextInput = "dl;kfjasl;fjdslajfklsajlf;jksaldjf;jsakfajsdlfj;;kasjfd;ajk"
     }
     
     //      textInput = textInput.filter { return "abcdefghijklmnopqrstuvwxyz".contains($0) }
@@ -55,6 +55,7 @@ extension ContentView {
      *    -- putting textInput = "" in .onDisappear seems to work, BUT
      *      ideally we create a custom wrapper for String that behaves like a string except it can only store one character ... so everytime it gets set, it just overwrites the old char... ???
      */
+    
     func handleCharacterChange() throws {
       guard let (row, col) = squareSelected, let axisSelected else {        // this handler should only be called when a square and axis are selected
         throw MyError.badbad
@@ -78,7 +79,6 @@ extension ContentView {
       guard old.count < new.count else {                                    // indicates backspace was pressed
         if boardState[row][col].letter != "" {
           boardState[row][col].letter = ""                                  // if current square has a letter, just delete it and return
-          return
         }
         else {                                                              // if current square doesn't have letter, move backwards and delete
           if axisSelected == .row && canSelectSquare(offset: -1) {
@@ -89,12 +89,12 @@ extension ContentView {
             squareSelected = (row - 1, col)
             boardState[row - 1][col].letter = ""
           }
-          return
         }
+        return
       }
       
       assert(new[..<new.index(before: new.endIndex)] == old)
-      let input = textInput[textInput.index(before: textInput.endIndex)]
+      let input = new[new.index(before: new.endIndex)]
       boardState[row][col].letter = input.uppercased()
       if axisSelected == .row && canSelectSquare(offset: 1) {
         squareSelected = (row, col + 1)
@@ -106,7 +106,7 @@ extension ContentView {
     
     
     func colorAt(row: Int, col: Int) -> Color {
-      if (boardState[row][col].black) {
+      if initBoard.rows[row].squares[col].correctLetter == nil {
         return .black
       }
       else if let squareSelected, squareSelected == (row, col) {
@@ -165,16 +165,7 @@ extension ContentView {
 }
 
 struct SquareState: Identifiable {
-  let black: Bool
   let id: String
   var selected: Bool
   var letter: String
 }
-
-//struct SquareState: Identifiable {
-//  let id: String
-//  let initial: Square
-//  let row: Int    // row and column used for highlighting
-//  let col: Int
-//  var currentLetter: String
-//}

@@ -30,7 +30,7 @@ struct ContentView: View {
   @FocusState var textFocussed: Bool
   @ViewBuilder
   private func KeyboardInput() -> some View {
-    if let (row, col) = viewModel.squareSelected {
+    if let (_, _) = viewModel.squareSelected {
       TextField("", text: $viewModel.textInput)
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
