@@ -19,7 +19,7 @@ enum MyError: Error {
 extension ContentView {
   @Observable
   class ViewModel {
-    var boardState = [SquareState]()
+    var boardState = [[SquareState]]()
     var squareSelected: (Int, Int)?
     var textInput: String
     var oldTextInput: String
@@ -30,24 +30,21 @@ extension ContentView {
     let initBoard: Board
     
     init(board: Board) {
-      var tempList: [SquareState] = []
+      var colList: [[SquareState]] = []
       for (_, row) in board.rows.enumerated() {
+        var rowList: [SquareState] = []
         for (_, sq) in row.squares.enumerated() {
-          tempList.append(SquareState(black: sq.correctLetter == nil, id: UUID().uuidString, selected: false, letter: ""))
+          rowList.append(SquareState(black: sq.correctLetter == nil, id: UUID().uuidString, selected: false, letter: ""))
         }
+        colList.append(rowList)
       }
       initBoard = board
-      boardState = tempList
+      boardState = colList
       rowLength = board.numCols
       rowCount = board.numRows
-      print("REINITIALIZED...?")
       textInput = ""
       oldTextInput = ""
     }
-    private func tfi(row: Int, col: Int) -> Int {
-      return row * rowLength + col
-    }
-    
     
     //      textInput = textInput.filter { return "abcdefghijklmnopqrstuvwxyz".contains($0) }
     /**
@@ -80,18 +77,18 @@ extension ContentView {
       }
       
       guard old.count < new.count else {                                    // indicates backspace was pressed
-        if boardState[tfi(row: row, col: col)].letter != "" {
-          boardState[tfi(row: row, col: col)].letter = ""                   // if current square has a letter, just delete it and return
+        if boardState[row][col].letter != "" {
+          boardState[row][col].letter = ""                                  // if current square has a letter, just delete it and return
           return
         }
         else {                                                              // if current square doesn't have letter, move backwards and delete
           if axisSelected == .row && canSelectSquare(offset: -1) {
             squareSelected = (row, col - 1)
-            boardState[tfi(row: row, col: col - 1)].letter = ""
+            boardState[row][col - 1].letter = ""
           }
           if axisSelected == .column && canSelectSquare(offset: -1) {
             squareSelected = (row - 1, col)
-            boardState[tfi(row: row - 1, col: col)].letter = ""
+            boardState[row - 1][col].letter = ""
           }
           return
         }
@@ -99,7 +96,7 @@ extension ContentView {
       
       assert(new[..<new.index(before: new.endIndex)] == old)  // debugger this
       let input = textInput[textInput.index(before: textInput.endIndex)]
-      boardState[tfi(row: row, col: col)].letter = input.uppercased()
+      boardState[row][col].letter = input.uppercased()
       if axisSelected == .row && canSelectSquare(offset: 1) {
         squareSelected = (row, col + 1)
       }
@@ -110,7 +107,7 @@ extension ContentView {
     
     
     func colorAt(row: Int, col: Int) -> Color {
-      if (boardState[row * rowLength + col].black) {
+      if (boardState[row][col].black) {
         return .black
       }
       else if let squareSelected, squareSelected == (row, col) {
@@ -126,7 +123,7 @@ extension ContentView {
     
     
     func letterAt(row: Int, col: Int) -> String {
-      return boardState[tfi(row: row, col: col)].letter
+      return boardState[row][col].letter
     }
     
     
