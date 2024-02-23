@@ -49,6 +49,12 @@ struct ContentView: View {
         .onAppear {
           self.textFocussed = true
         }
+        .onSubmit {
+          self.textFocussed = false
+          viewModel.squareSelected = nil
+          viewModel.axisSelected = nil
+          viewModel.selected = nil
+        }
     } else {
       EmptyView()
     }
