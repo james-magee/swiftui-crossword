@@ -66,12 +66,11 @@ extension ContentView {
       
       func canSelectSquare(offset: Int) -> Bool {
         if axisSelected == .row {
-          return col < rowLength - 1 && 
+          return (col + offset) < rowLength &&
           initBoard.rows[row].squares[col + offset].correctLetter != nil
         }
         else {
-          assert(axisSelected == .column)                                   // probably unnecessary...
-          return row < rowCount - 1 &&
+          return (row + offset) < rowCount &&
           initBoard.rows[row + offset].squares[col].correctLetter != nil
         }
       }
@@ -94,7 +93,7 @@ extension ContentView {
         }
       }
       
-      assert(new[..<new.index(before: new.endIndex)] == old)  // debugger this
+      assert(new[..<new.index(before: new.endIndex)] == old)
       let input = textInput[textInput.index(before: textInput.endIndex)]
       boardState[row][col].letter = input.uppercased()
       if axisSelected == .row && canSelectSquare(offset: 1) {
