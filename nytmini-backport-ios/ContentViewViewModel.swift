@@ -12,12 +12,17 @@ enum Axis {
   case column, row
 }
 
+enum MyError: Error {
+  case badbad
+}
+
 extension ContentView {
   @Observable
   class ViewModel {
     var boardState = [SquareState]()
     var squareSelected: (Int, Int)?
     var textInput: String
+    var oldTextInput: String
     var axisSelected: Axis?   // whether a row or column is selected
     var selected: Int?        // which indices (row or column spaces) are selected
     let rowLength: Int	
@@ -37,11 +42,14 @@ extension ContentView {
       rowCount = board.numRows
       print("REINITIALIZED...?")
       textInput = ""
+      oldTextInput = ""
     }
     private func tfi(row: Int, col: Int) -> Int {
       return row * rowLength + col
     }
     
+    
+    //      textInput = textInput.filter { return "abcdefghijklmnopqrstuvwxyz".contains($0) }
     /**
      *  Note: this handler is called by onChange, between receiving the new value of textInput and updating textInput
      *    -- this means that any change to textInput in the below function will have no effects outside the function's scope
@@ -50,18 +58,53 @@ extension ContentView {
      *    -- putting textInput = "" in .onDisappear seems to work, BUT
      *      ideally we create a custom wrapper for String that behaves like a string except it can only store one character ... so everytime it gets set, it just overwrites the old char... ???
      */
-    func handleCharacterChangeAt(index: Int) {
-//      textInput = textInput.filter { return "abcdefghijklmnopqrstuvwxyz".contains($0) }
-      let str = textInput[textInput.index(before: textInput.endIndex)]
-      boardState[index].letter = str.uppercased()
-      if let axisSelected, let squareSelected {
-        let (row, col) = squareSelected
-        if axisSelected == .row && col < rowLength - 1 && initBoard.rows[row].squares[col + 1].correctLetter != nil {
-          self.squareSelected = (row, col + 1)
+    func handleCharacterChange() throws {
+      guard let (row, col) = squareSelected, let axisSelected else {        // this handler should only be called when a square and axis are selected
+        throw MyError.badbad
+      }
+      
+      let old = oldTextInput
+      let new = textInput
+      oldTextInput = textInput
+      
+      func canSelectSquare(offset: Int) -> Bool {
+        if axisSelected == .row {
+          return col < rowLength - 1 && 
+          initBoard.rows[row].squares[col + offset].correctLetter != nil
         }
-        else if axisSelected == .column && row < rowCount - 1 && initBoard.rows[row + 1].squares[col].correctLetter != nil {
-          self.squareSelected = (row + 1, col)
+        else {
+          assert(axisSelected == .column)                                   // probably unnecessary...
+          return row < rowCount - 1 &&
+          initBoard.rows[row + offset].squares[col].correctLetter != nil
         }
+      }
+      
+      guard old.count < new.count else {                                    // indicates backspace was pressed
+        if boardState[tfi(row: row, col: col)].letter != "" {
+          boardState[tfi(row: row, col: col)].letter = ""                   // if current square has a letter, just delete it and return
+          return
+        }
+        else {                                                              // if current square doesn't have letter, move backwards and delete
+          if axisSelected == .row && canSelectSquare(offset: -1) {
+            squareSelected = (row, col - 1)
+            boardState[tfi(row: row, col: col - 1)].letter = ""
+          }
+          if axisSelected == .column && canSelectSquare(offset: -1) {
+            squareSelected = (row - 1, col)
+            boardState[tfi(row: row - 1, col: col)].letter = ""
+          }
+          return
+        }
+      }
+      
+      assert(new[..<new.index(before: new.endIndex)] == old)  // debugger this
+      let input = textInput[textInput.index(before: textInput.endIndex)]
+      boardState[tfi(row: row, col: col)].letter = input.uppercased()
+      if axisSelected == .row && canSelectSquare(offset: 1) {
+        squareSelected = (row, col + 1)
+      }
+      if axisSelected == .column && canSelectSquare(offset: 1) {
+        squareSelected = (row + 1, col)
       }
     }
     

@@ -40,7 +40,11 @@ struct ContentView: View {
         .accentColor(.clear)
         .focused($textFocussed)
         .onChange(of: viewModel.textInput) {
-          viewModel.handleCharacterChangeAt(index: row * viewModel.rowLength + col)
+          do {
+            try viewModel.handleCharacterChange()
+          } catch {
+            print("oh no")
+          }
         }
         .onAppear {
           self.textFocussed = true
