@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 
 enum Axis {
   case column, row
@@ -15,6 +16,8 @@ enum Axis {
 enum MyError: Error {
   case badbad
 }
+
+let darkColor = Color(red: 14/255, green: 61/255, blue: 56/255)
 
 extension ContentView {
   @Observable
@@ -46,7 +49,12 @@ extension ContentView {
       oldTextInput = "dl;kfjasl;fjdslajfklsajlf;jksaldjf;jsakfajsdlfj;;kasjfd;ajk"
     }
     
-    //      textInput = textInput.filter { return "abcdefghijklmnopqrstuvwxyz".contains($0) }
+    func computeSquareLength () -> CGFloat {
+      assert(initBoard.rows.count > 0)
+      assert(initBoard.rows.count == initBoard.rows[0].squares.count)
+      return (UIScreen.main.bounds.width - 20) / CGFloat(initBoard.rows.count)
+    }
+    
     /**
      *  Note: this handler is called by onChange, between receiving the new value of textInput and updating textInput
      *    -- this means that any change to textInput in the below function will have no effects outside the function's scope
@@ -68,10 +76,12 @@ extension ContentView {
       func canSelectSquare(offset: Int) -> Bool {
         if axisSelected == .row {
           return (col + offset) < rowLength &&
+          (col + offset) >= 0 &&
           initBoard.rows[row].squares[col + offset].correctLetter != nil
         }
         else {
           return (row + offset) < rowCount &&
+          (row + offset) >= 0 &&
           initBoard.rows[row + offset].squares[col].correctLetter != nil
         }
       }
@@ -93,7 +103,6 @@ extension ContentView {
         return
       }
       
-      assert(new[..<new.index(before: new.endIndex)] == old)
       let input = new[new.index(before: new.endIndex)]
       boardState[row][col].letter = input.uppercased()
       if axisSelected == .row && canSelectSquare(offset: 1) {
@@ -107,17 +116,24 @@ extension ContentView {
     
     func colorAt(row: Int, col: Int) -> Color {
       if initBoard.rows[row].squares[col].correctLetter == nil {
-        return .black
+        return .secondaryColor
       }
       else if let squareSelected, squareSelected == (row, col) {
-        return Color.yellow.opacity(0.50)
+        return .tertiaryColor
       }
       else if let axisSelected, let selected {
         if (axisSelected == .column && selected == col) || (axisSelected == .row && selected == row) {
-          return Color.blue.opacity(0.25)
+          return .quaternaryColor
         }
       }
-      return .white
+      return .primaryColor
+    }
+    
+    func borderWidthAt(row: Int, col: Int) -> CGFloat {
+      if initBoard.rows[row].squares[col].correctLetter == nil {
+        return 0.0
+      }
+      return 0.5
     }
     
     
@@ -130,6 +146,9 @@ extension ContentView {
      * selects column if this is square is currently selected; otherwise selects row
      */
     func handleTapAt(row: Int, col: Int) {
+      guard initBoard.rows[row].squares[col].correctLetter != nil else {
+        return
+      }
       if let squareSelected, squareSelected == (row, col) {
         if axisSelected == .column {
           axisSelected = .row
@@ -153,13 +172,22 @@ extension ContentView {
       }
     }
     
-    // QUESTION:
-    //  should the ViewModel ever return views? ... 
     func numAt(row: Int, col: Int) -> Int? {
       if let num = initBoard.rows[row].squares[col].number {
         return num
       }
       return nil
+    }
+    
+    func currentHint() -> String {
+      guard let selected, let axisSelected else {
+        return ""
+      }
+      if axisSelected == .row {
+        return initBoard.acrossHints[selected].content
+      } else {
+        return initBoard.downHints[selected].content
+      }
     }
   }
 }

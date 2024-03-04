@@ -26,7 +26,7 @@ struct nytmini_backport_iosApp: App {
     var body: some Scene {
         WindowGroup {
           ContentView(board: buildTestBoard())
+            .background(Color.primaryColor)
         }
-//        .modelContainer(sharedModelContainer)
     }
 }

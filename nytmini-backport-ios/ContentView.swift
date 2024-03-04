@@ -7,13 +7,15 @@
 import SwiftUI
 import SwiftData
 
-let sqLength = 55.0
 
 struct ContentView: View {
   @State private var viewModel: ViewModel
+  let sqSideLength: CGFloat
   
   init(board: Board) {
-    viewModel = ViewModel(board: board)
+    let viewModel = ViewModel(board: board)
+    self.sqSideLength = viewModel.computeSquareLength()
+    self.viewModel = viewModel
   }
   
   @ViewBuilder
@@ -28,36 +30,42 @@ struct ContentView: View {
   }
   
   @FocusState var textFocussed: Bool
-  @ViewBuilder
-  private func KeyboardInput() -> some View {
-    if let (_, _) = viewModel.squareSelected {
-      TextField("", text: $viewModel.textInput)
-        .autocorrectionDisabled()
-        .textInputAutocapitalization(.never)
-        .frame(width: 0, height: 0)
-        .foregroundColor(.clear)
-        .background(.clear)
-        .accentColor(.clear)
-        .focused($textFocussed)
-        .onChange(of: viewModel.textInput) {
-          do {
-            try viewModel.handleCharacterChange()
-          } catch {
-            print("oh no")
+  var KeyboardInput: some View {
+    ZStack {
+      if let (_, _) = viewModel.squareSelected {
+        TextField("", text: $viewModel.textInput)
+          .autocorrectionDisabled()
+          .textInputAutocapitalization(.never)
+          .frame(width: 0, height: 100)
+          .foregroundColor(.clear)
+          .background(.clear)
+          .accentColor(.clear)
+          .focused($textFocussed)
+          .onChange(of: viewModel.textInput) {
+            do {
+              try viewModel.handleCharacterChange()
+            } catch {
+              print("Problem")
+            }
           }
-        }
-        .onAppear {
-          self.textFocussed = true
-        }
-        .onSubmit {
-          self.textFocussed = false
-          viewModel.squareSelected = nil
-          viewModel.axisSelected = nil
-          viewModel.selected = nil
-        }
-    } else {
-      EmptyView()
+          .onAppear {
+            withAnimation(.easeInOut(duration: 5.0)) {
+              self.textFocussed = true
+            }
+          }
+          .onSubmit {
+            withAnimation(.easeInOut(duration: 0.25)) {
+              viewModel.squareSelected = nil
+              viewModel.axisSelected = nil
+              viewModel.selected = nil
+            }
+            self.textFocussed = false
+          }
+      } else {
+        EmptyView()
+      }
     }
+    .transition(.opacity)
   }
   
   var boardView: some View {
@@ -67,61 +75,124 @@ struct ContentView: View {
           GridRow {
             ForEach(0..<viewModel.rowLength) { colIndex in
               ZStack(alignment: .topLeading) {
-                Rectangle()
-                  .fill(viewModel.colorAt(row: rowIndex, col: colIndex))
-                  .frame(width: sqLength, height: sqLength)
-                  .border(.gray, width: 0.5)
-                  .onTapGesture(count: 1) {
-                    viewModel.handleTapAt(row: rowIndex, col: colIndex)
-                  }
-                SquareNumber(row: rowIndex, col: colIndex)
-                Text(viewModel.letterAt(row: rowIndex, col: colIndex))
-                  .frame(width: sqLength, height: sqLength)
-                  .font(.custom("myfont", size: 24))
+                if viewModel.initBoard.rows[rowIndex].squares[colIndex].correctLetter == nil {
+                  Rectangle()
+                    .fill(viewModel.colorAt(row: rowIndex, col: colIndex))
+                    .frame(width: sqSideLength, height: sqSideLength)
+                    .border(Color.primaryColor, width: 0.5)
+                } else {
+                  Rectangle()
+                    .fill(viewModel.colorAt(row: rowIndex, col: colIndex))
+                    .frame(width: sqSideLength, height: sqSideLength)
+                    .border(Color.secondaryColor, width: viewModel.borderWidthAt(row: rowIndex, col: colIndex))
+                    .onTapGesture(count: 1) {
+                      if viewModel.squareSelected != nil {
+                        viewModel.handleTapAt(row: rowIndex, col: colIndex)
+                      } else {
+                        withAnimation(.easeInOut(duration: 0.5)) {
+                          viewModel.handleTapAt(row: rowIndex, col: colIndex)
+                        }
+                      }
+                    }
+                  SquareNumber(row: rowIndex, col: colIndex)
+                  Text(viewModel.letterAt(row: rowIndex, col: colIndex))
+                    .frame(width: sqSideLength, height: sqSideLength)
+                    .font(.custom("myfont", size: 24))
+//                    .font(.system(size: 24))
+                }
               }
             }
           }
         }
       }
-      KeyboardInput()
+      KeyboardInput
     }
   }
   
+  @State var offsetFromTop = 0.0
   var body: some View {
     VStack() {
-//      Spacer()
-//        .frame(idealHeight: 15)
-//        .fixedSize()
-//      HStack(spacing: 10.0) {
-//        Spacer()
-//        hintsView
-//        Spacer()
-//        hintsView
-//        Spacer()
-//
-//      }
-//      Spacer()
-//        .frame(idealHeight: 35)
-//        .fixedSize()
+      ZStack {
+        if viewModel.squareSelected == nil {
+          AllHintsView
+        } else {
+          HighlightedHintView
+        }
+      }
+      .transition(.opacity)
+      Spacer()
+        .frame(idealHeight: 15)
+        .fixedSize()
       boardView
       Spacer()
     }
   }
   
-//  var hintsView: some View {
-//    Grid(alignment: .leading, verticalSpacing: 6.0) {
-//      Text("ACROSS")
-//      ForEach(buildTestBoard().acrossHints) { hint in
-//        GridRow {
-//          Text("\(hint.number)")
-//            .font(.system(size: 11))
-//            .bold()
-//          Text(hint.content)
-//            .font(.system(size: 10))
-//        }
-//      }
-//    }
-//  }
+  var AllHintsView: some View {
+    VStack {
+      Spacer()
+        .frame(idealHeight: 15)
+        .fixedSize()
+      HStack(alignment: .top, spacing: 10.0) {
+        Spacer()
+        AcrossHintsView
+        Spacer()
+        DownHintsView
+        Spacer()
+      }
+    }
+  }
+  
+  var HighlightedHintView: some View {
+    VStack {
+      Spacer()
+        .frame(idealHeight: 125)
+        .fixedSize()
+      ZStack {
+        Rectangle()
+          .fill(Color.quaternaryColor)
+          .frame(width: 7 * 55 - 6, height: 60)
+        Text("\(viewModel.currentHint())")
+      }
+    }
+  }
+  
+  var DownHintsView: some View {
+    Grid(alignment: .leading, verticalSpacing: 8.0) {
+      Text("Down")
+        .frame(alignment: .trailing)
+        .padding(5.0)
+        .background(.black)
+        .foregroundColor(.white)
+      ForEach(0..<viewModel.initBoard.downHints.count) { hintIndex in
+        GridRow(alignment: .top) {
+          Text("\(viewModel.initBoard.downHints[hintIndex].number)")
+            .font(.system(size: 14))
+            .bold()
+          Text(viewModel.initBoard.downHints[hintIndex].content)
+            .font(.system(size: 14))
+        }
+      }
+    }
+  }
+  
+  var AcrossHintsView: some View {
+    Grid(alignment: .leading, verticalSpacing: 8.0) {
+      Text("Across")
+        .padding(5.0)
+        .background(.black)
+        .foregroundColor(.white)
+      ForEach(0..<viewModel.initBoard.acrossHints.count) { hintIndex in
+        GridRow(alignment: .top) {
+          Text("\(viewModel.initBoard.acrossHints[hintIndex].number)")
+            .font(.system(size: 14))
+            .bold()
+          Text(viewModel.initBoard.acrossHints[hintIndex].content)
+            .font(.system(size: 14))
+        }
+      }
+    }
+  }
 }
 
 #Preview {

@@ -5,12 +5,6 @@
 //  Created by James Magee on 2/9/24.
 //
 
-/**
- *    Instances of Board are used to set up the view — they
- *
- */
-
-
 import Foundation
 
 
@@ -120,6 +114,7 @@ func buildTestBoard() -> Board {
   ]
   
   let downHints = [
+    Hint(number: 7, content: "Folk rock's Mumford & ___"),
     Hint(number: 1, content: "Gobbling group"),
     Hint(number: 5, content: "Emotion for a hothead"),
     Hint(number: 6, content: "Down under greeting"),
